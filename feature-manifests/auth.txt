@@ -1,0 +1,6 @@
+Feature: auth
+Includes:
+- backend/controllers/auth.controller.js
+- backend/routes/auth.route.js
+- backend/models/user.model.js
+- backend/middleware/auth.middleware.js
