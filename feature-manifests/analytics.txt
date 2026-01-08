@@ -1,0 +1,6 @@
+Feature: analytics
+Includes:
+- backend/controllers/analytics.controller.js
+- backend/routes/analytics.route.js
+- frontend/src/components/AnalyticsTab.jsx
+- frontend/src/pages/AdminPage.jsx (analytics tab)
