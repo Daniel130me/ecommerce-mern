@@ -1,0 +1,7 @@
+Feature: payments
+Includes:
+- backend/controllers/payment.controller.js
+- backend/routes/payment.route.js
+- backend/lib/stripe.js
+- frontend/src/pages/PurchaseSuccessPage.jsx
+- frontend/src/pages/PurchaseCancelPage.jsx
