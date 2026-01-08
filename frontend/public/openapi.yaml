@@ -1,0 +1,593 @@
+openapi: 3.0.3
+info:
+  title: MERN E-Commerce API
+  version: 1.0.0
+  description: API specification for the MERN e-commerce backend
+servers:
+  - url: http://localhost:5000
+    description: Local dev server
+tags:
+  - name: Auth
+  - name: Products
+  - name: Cart
+  - name: Coupons
+  - name: Payments
+  - name: Analytics
+paths:
+  /api/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request / user exists
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid credentials
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out the current user (clears cookies)
+      responses:
+        '200':
+          description: Logged out
+  /api/auth/refresh-token:
+    post:
+      tags: [Auth]
+      summary: Refresh access token using refresh token cookie
+      responses:
+        '200':
+          description: Token refreshed
+        '401':
+          description: No refresh token provided or invalid
+  /api/auth/profile:
+    get:
+      tags: [Auth]
+      summary: Get current user's profile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+
+  /api/products:
+    get:
+      tags: [Products]
+      summary: Get all products (admin-protected)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+    post:
+      tags: [Products]
+      summary: Create a new product (admin-protected)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /api/products/featured:
+    get:
+      tags: [Products]
+      summary: Get featured products
+      responses:
+        '200':
+          description: Array of featured products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /api/products/category/{category}:
+    get:
+      tags: [Products]
+      summary: Get products by category
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Products in category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+  /api/products/recommendations:
+    get:
+      tags: [Products]
+      summary: Get recommended products (sample)
+      responses:
+        '200':
+          description: Recommended products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /api/products/{id}:
+    patch:
+      tags: [Products]
+      summary: Toggle featured flag on a product (admin-protected)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+    delete:
+      tags: [Products]
+      summary: Delete a product (admin-protected)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted successfully
+  
+  /api/cart:
+    get:
+      tags: [Cart]
+      summary: Get cart products for current user
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Cart items with quantities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItemFull'
+    post:
+      tags: [Cart]
+      summary: Add product to cart
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+              required: [productId]
+      responses:
+        '200':
+          description: Updated cart items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+    delete:
+      tags: [Cart]
+      summary: Remove all items or a specific item from cart
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+      responses:
+        '200':
+          description: Updated cart items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+  /api/cart/{id}:
+    put:
+      tags: [Cart]
+      summary: Update quantity for a cart item
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+              required: [quantity]
+      responses:
+        '200':
+          description: Updated cart items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+        '404':
+          description: Product not found in cart
+
+  /api/coupons:
+    get:
+      tags: [Coupons]
+      summary: Get active coupon for current user
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Coupon or null
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Coupon'
+                  - type: 'null'
+    post:
+      summary: (not used)
+  /api/coupons/validate:
+    post:
+      tags: [Coupons]
+      summary: Validate a coupon code for current user
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+              required: [code]
+      responses:
+        '200':
+          description: Coupon valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+                  discountPercentage:
+                    type: number
+        '404':
+          description: Coupon not found or expired
+
+  /api/payments/create-checkout-session:
+    post:
+      tags: [Payments]
+      summary: Create a Stripe checkout session
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                products:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CheckoutProduct'
+                couponCode:
+                  type: string
+      responses:
+        '200':
+          description: Stripe session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  totalAmount:
+                    type: number
+        '400':
+          description: Invalid products array
+  /api/payments/checkout-success:
+    post:
+      tags: [Payments]
+      summary: Handle successful checkout and create order
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionId:
+                  type: string
+              required: [sessionId]
+      responses:
+        '200':
+          description: Order created after successful payment
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  orderId:
+                    type: string
+
+  /api/analytics:
+    get:
+      tags: [Analytics]
+      summary: Get site analytics (admin only)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Analytics and daily sales data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  analyticsData:
+                    type: object
+                    properties:
+                      users:
+                        type: integer
+                      products:
+                        type: integer
+                      totalSales:
+                        type: integer
+                      totalRevenue:
+                        type: number
+                  dailySalesData:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                        sales:
+                          type: integer
+                        revenue:
+                          type: number
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
+  schemas:
+    SignupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [name, email, password]
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        cartItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        image:
+          type: string
+        category:
+          type: string
+        isFeatured:
+          type: boolean
+    CreateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        image:
+          type: string
+        category:
+          type: string
+      required: [name, price]
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+        quantity:
+          type: integer
+    CartItemFull:
+      allOf:
+        - $ref: '#/components/schemas/Product'
+        - type: object
+          properties:
+            quantity:
+              type: integer
+    Coupon:
+      type: object
+      properties:
+        _id:
+          type: string
+        code:
+          type: string
+        discountPercentage:
+          type: number
+        expirationDate:
+          type: string
+          format: date-time
+        userId:
+          type: string
+        isActive:
+          type: boolean
+    CheckoutProduct:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        image:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+              quantity:
+                type: integer
+              price:
+                type: number
+        totalAmount:
+          type: number
+        stripeSessionId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
