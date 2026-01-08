@@ -1,0 +1,7 @@
+Feature: coupons
+Includes:
+- backend/controllers/coupon.controller.js
+- backend/routes/coupon.route.js
+- backend/models/coupon.model.js
+- frontend/src/components/GiftCouponCard.jsx
+- frontend/src/pages/CartPage.jsx (coupon validation integration)
