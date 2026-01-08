@@ -1,0 +1,12 @@
+Feature: frontend-theme
+Includes:
+- frontend/src/components/Navbar.jsx
+- frontend/src/pages/HomePage.jsx
+- frontend/src/components/ProductCard.jsx
+- frontend/src/components/ProductsList.jsx
+- frontend/src/components/FeaturedProducts.jsx
+- frontend/src/components/CreateProductForm.jsx
+- frontend/src/pages/LoginPage.jsx
+- frontend/src/pages/SignUpPage.jsx
+- frontend/src/components/AnalyticsTab.jsx
+- other UI theme updates across frontend
