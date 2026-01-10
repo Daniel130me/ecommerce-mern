@@ -1,0 +1,6 @@
+Feature: cart
+Includes:
+- backend/controllers/cart.controller.js
+- backend/routes/cart.route.js
+- frontend/src/components/CartItem.jsx
+- frontend/src/pages/CartPage.jsx
