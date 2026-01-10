@@ -1,0 +1,8 @@
+Feature: products
+Includes:
+- backend/controllers/product.controller.js
+- backend/routes/product.route.js
+- backend/models/product.model.js
+- frontend/src/components/ProductCard.jsx
+- frontend/src/components/ProductsList.jsx
+- frontend/src/components/FeaturedProducts.jsx
